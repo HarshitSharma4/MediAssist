@@ -1,6 +1,6 @@
 import React from 'react';
-import { View } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { View, StyleSheet, Platform } from 'react-native';
+import { Text, useTheme, Surface } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -18,6 +18,8 @@ import ProfileScreen from '../screens/profile/ProfileScreen';
 import ReportMetadataScreen from '../screens/reports/metadata/ReportMetadataScreen';
 import HospitalDetailsScreen from '../screens/hospitals/HospitalDetailsScreen';
 import ReportDetailsScreen from '../screens/reports/details/ReportDetailsScreen';
+import HistoryScreen from '../screens/reports/history/HistoryScreen';
+import EditProfileScreen from '../screens/profile/EditProfileScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -30,56 +32,53 @@ const MainTabs = () => {
         <Tab.Navigator
             screenOptions={({ route }) => ({
                 headerShown: false,
+                tabBarShowLabel: false,
+                tabBarHideOnKeyboard: true, // Added to improve typing experience
                 tabBarStyle: {
+                    position: 'absolute',
+                    bottom: 25,
+                    left: 20,
+                    right: 20,
+                    elevation: 10,
                     backgroundColor: theme.colors.surface,
-                    borderTopColor: theme.colors.outline,
-                    height: 60,
-                    paddingBottom: 8,
+                    borderRadius: 25,
+                    height: 70,
+                    borderTopWidth: 0,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 10,
                 },
                 tabBarActiveTintColor: theme.colors.primary,
-                tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
+                tabBarInactiveTintColor: theme.colors.outline,
                 tabBarIcon: ({ color, size, focused }) => {
                     let iconName: keyof typeof Icon.glyphMap = 'circle';
 
-                    if (route.name === 'Home') {
-                        iconName = 'view-dashboard';
-                    } else if (route.name === 'Upload') {
-                        iconName = 'cloud-upload';
-                    } else if (route.name === 'Ask') {
-                        iconName = 'robot';
-                    } else if (route.name === 'Hospitals') {
-                        iconName = 'hospital-marker';
-                    } else if (route.name === 'Profile') {
-                        iconName = 'account';
+                    if (route.name === 'Home') iconName = 'view-dashboard-outline';
+                    else if (route.name === 'Upload') iconName = 'plus-circle-outline';
+                    else if (route.name === 'Ask') iconName = 'robot-happy-outline';
+                    else if (route.name === 'Hospitals') iconName = 'map-marker-radius-outline'; // Changed
+                    else if (route.name === 'Profile') iconName = 'account-circle-outline';
+
+                    if (focused) {
+                        iconName = iconName.replace('-outline', '') as any;
                     }
 
                     if (route.name === 'Ask') {
                         return (
-                            <View style={{
-                                top: -20,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                width: 60,
-                                height: 60,
-                                borderRadius: 30,
-                                backgroundColor: theme.colors.primary,
-                                elevation: 5,
-                                shadowColor: '#000',
-                                shadowOffset: { width: 0, height: 2 },
-                                shadowOpacity: 0.25,
-                                shadowRadius: 3.84,
-                            }}>
-                                <Icon name="robot" size={30} color={theme.colors.onPrimary} />
-                            </View>
-                        )
+                            <Surface style={[focused ? styles.askButtonFocused : styles.askButton, { backgroundColor: theme.colors.primary }]} elevation={4}>
+                                <Icon name="robot" size={28} color={theme.colors.onPrimary} />
+                            </Surface>
+                        );
                     }
 
-                    return <Icon name={iconName} size={size} color={color} />;
+                    return (
+                        <View style={styles.iconContainer}>
+                            <Icon name={iconName} size={28} color={color} />
+                            {focused && <View style={[styles.activeDot, { backgroundColor: theme.colors.primary }]} />}
+                        </View>
+                    );
                 },
-                tabBarLabel: ({ focused, color }) => {
-                    if (route.name === 'Ask') return null;
-                    return <Text style={{ color, fontSize: 10, fontWeight: focused ? 'bold' : 'normal' }}>{route.name}</Text>;
-                }
             })}
         >
             <Tab.Screen name="Home" component={HomeScreen} />
@@ -111,12 +110,51 @@ const RootNavigator = () => {
                 ) : (
                     <Stack.Screen name="Main" component={MainTabs} />
                 )}
-                <Stack.Screen name="ReportMetadata" component={ReportMetadataScreen} options={{ headerShown: true, title: 'Report Details' }} />
-                <Stack.Screen name="HospitalDetails" component={HospitalDetailsScreen} options={{ headerShown: true, title: 'Hospital Details' }} />
-                <Stack.Screen name="ReportDetails" component={ReportDetailsScreen} options={{ headerShown: true, title: 'View Report' }} />
+                <Stack.Screen name="ReportMetadata" component={ReportMetadataScreen} options={{ headerShown: true, title: 'Report Analysis', headerTransparent: true }} />
+                <Stack.Screen name="HospitalDetails" component={HospitalDetailsScreen} options={{ headerShown: true, title: 'Hospital Info', headerTransparent: true }} />
+                <Stack.Screen name="ReportDetails" component={ReportDetailsScreen} options={{ headerShown: true, title: 'Medical Report', headerTransparent: true }} />
+                <Stack.Screen name="History" component={HistoryScreen} options={{ headerShown: true, title: 'Medical Records', headerTransparent: true }} />
+                <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ headerShown: true, title: 'Edit Profile', headerTransparent: true }} />
             </Stack.Navigator>
         </NavigationContainer>
     );
 };
+
+const styles = StyleSheet.create({
+    askButton: {
+        bottom: 15,
+        width: 60,
+        height: 60,
+        borderRadius: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+    },
+    askButtonFocused: {
+        bottom: 0,
+        width: 55,
+        height: 55,
+        borderRadius: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+    },
+    iconContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    activeDot: {
+        width: 4,
+        height: 4,
+        borderRadius: 2,
+        marginTop: 4,
+    }
+});
 
 export default RootNavigator;

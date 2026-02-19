@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
-import { Text, Card, Avatar, useTheme, Button, ProgressBar } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, Dimensions, TouchableOpacity, ImageBackground } from 'react-native';
+import { Text, Card, Avatar, useTheme, Button, ProgressBar, Surface, Badge } from 'react-native-paper';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -12,172 +12,263 @@ const HomeScreen = ({ navigation }: any) => {
     const user = useAuthStore((state) => state.user);
 
     // Mock Data
-    const recentReports = [
-        { id: '1', title: 'Blood Test Results', date: '12 Feb, 2024', status: 'Normal' },
-        { id: '2', title: 'Chest X-Ray', date: '10 Feb, 2024', status: 'Review Needed' },
+    const alerts = [
+        { id: '1', title: 'Medication Reminder', body: 'Take Amoxicillin in 30 mins', type: 'pill', color: '#FF7043' },
+        { id: '2', title: 'Report Ready', body: 'Blood Test analysis is complete', type: 'check-circle', color: '#00695C' },
     ];
 
-    const activeMedicines = [
-        { id: '1', name: 'Paracetamol', dosage: '500mg', time: 'After Lunch' },
-        { id: '2', name: 'Amoxicillin', dosage: '250mg', time: 'Night' },
+    const stats = [
+        { label: 'Heart Rate', value: '72', unit: 'bpm', icon: 'heart-pulse', color: '#F44336' },
+        { label: 'Sleep', value: '7.5', unit: 'hrs', icon: 'bed-outline', color: '#3F51B5' },
     ];
 
     return (
         <ScreenWrapper style={styles.screen}>
             <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 
-                {/* Header / Greeting */}
+                {/* Modern Header */}
                 <View style={styles.header}>
                     <View>
-                        <Text variant="titleMedium" style={{ color: theme.colors.onSurfaceVariant }}>Welcome Back,</Text>
-                        <Text variant="headlineMedium" style={{ fontWeight: 'bold', color: theme.colors.primary }}>
+                        <Text variant="bodyLarge" style={{ color: theme.colors.outline, fontWeight: '500' }}>Good Morning,</Text>
+                        <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>
                             {user?.name || 'Harshit'}
                         </Text>
                     </View>
-                    <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                        <Avatar.Text size={45} label={user?.name?.substring(0, 2).toUpperCase() || 'HA'} style={{ backgroundColor: theme.colors.secondaryContainer }} />
-                    </TouchableOpacity>
-                </View>
-
-                {/* Quick Health Summary */}
-                <Card style={[styles.summaryCard, { backgroundColor: theme.colors.primaryContainer }]}>
-                    <Card.Content>
-                        <Text variant="titleMedium" style={{ color: theme.colors.onPrimaryContainer, fontWeight: 'bold' }}>Health Score</Text>
-                        <View style={styles.scoreRow}>
-                            <Text variant="displayMedium" style={{ fontWeight: 'bold', color: theme.colors.primary }}>85</Text>
-                            <Text variant="titleSmall" style={{ color: theme.colors.primary, marginBottom: 8 }}>/100</Text>
-                        </View>
-                        <ProgressBar progress={0.85} color={theme.colors.primary} style={styles.progressBar} />
-                        <Text variant="bodySmall" style={{ marginTop: 5, color: theme.colors.onPrimaryContainer }}>
-                            You're doing great! Keep up the good work.
-                        </Text>
-                    </Card.Content>
-                </Card>
-
-                {/* Emergency & Hospital Shortcut */}
-                <View style={styles.shortcutRow}>
-                    <TouchableOpacity
-                        style={[styles.shortcutBtn, { backgroundColor: '#ffebee', borderColor: '#ffcdd2', borderWidth: 1 }]}
-                        onPress={() => alert('Emergency SOS Triggered!')}
-                    >
-                        <Icon name="ambulance" size={24} color="#d32f2f" />
-                        <Text style={{ color: '#d32f2f', fontWeight: 'bold', marginTop: 5 }}>Emergency</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.shortcutBtn, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline, borderWidth: 1 }]}
-                        onPress={() => navigation.navigate('Hospitals')}
-                    >
-                        <Icon name="hospital-marker" size={24} color={theme.colors.primary} />
-                        <Text style={{ color: theme.colors.primary, fontWeight: 'bold', marginTop: 5 }}>Nearby Hospitals</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* AI Suggestions */}
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Text variant="titleLarge" style={styles.sectionTitle}>AI Suggestions</Text>
-                        <Icon name="creation" size={20} color={theme.colors.tertiary} />
-                    </View>
-                    <Card style={styles.aiCard}>
-                        <Card.Content style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                            <Icon name="lightbulb-on-outline" size={30} color="#fbc02d" />
-                            <View style={{ flex: 1 }}>
-                                <Text variant="bodyMedium">Based on your recent reports, increase water intake to 3L daily.</Text>
-                            </View>
-                        </Card.Content>
-                    </Card>
-                </View>
-
-                {/* Active Medicines */}
-                <View style={styles.section}>
-                    <Text variant="titleLarge" style={styles.sectionTitle}>Active Medicines</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                        {activeMedicines.map((med) => (
-                            <Card key={med.id} style={[styles.medCard, { backgroundColor: theme.colors.surface }]}>
-                                <Card.Content>
-                                    <View style={styles.medIcon}>
-                                        <Icon name="pill" size={20} color={theme.colors.primary} />
-                                    </View>
-                                    <Text variant="titleMedium" style={{ fontWeight: 'bold', marginTop: 5 }}>{med.name}</Text>
-                                    <Text variant="bodySmall">{med.dosage}</Text>
-                                    <View style={[styles.timeBadge, { backgroundColor: theme.colors.secondaryContainer }]}>
-                                        <Text variant="labelSmall" style={{ color: theme.colors.onSecondaryContainer }}>{med.time}</Text>
-                                    </View>
-                                </Card.Content>
-                            </Card>
-                        ))}
-                        <TouchableOpacity style={[styles.medCard, { justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.surfaceVariant }]}>
-                            <Icon name="plus" size={30} color={theme.colors.onSurfaceVariant} />
-                            <Text variant="labelSmall">Add New</Text>
+                    <View style={styles.headerIcons}>
+                        <TouchableOpacity style={styles.iconBtn}>
+                            <Icon name="bell-outline" size={26} color={theme.colors.onSurface} />
+                            <Badge size={8} style={styles.badge} />
                         </TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                            <Avatar.Image
+                                size={45}
+                                source={{ uri: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Harshit' }}
+                                style={{ backgroundColor: theme.colors.surfaceVariant }}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* Notification / Alert Carousel (Integrated instead of separate screen) */}
+                <View style={styles.alertSection}>
+                    <Text variant="titleMedium" style={styles.sectionTitle}>Daily Alerts</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.alertScroll}>
+                        {alerts.map(alert => (
+                            <Surface key={alert.id} style={[styles.alertCard, { backgroundColor: alert.color + '15' }]} elevation={0}>
+                                <View style={[styles.alertIcon, { backgroundColor: alert.color }]}>
+                                    <Icon name={alert.type as any} size={20} color="white" />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <Text variant="labelLarge" style={{ color: alert.color, fontWeight: 'bold' }}>{alert.title}</Text>
+                                    <Text variant="bodySmall" numberOfLines={1}>{alert.body}</Text>
+                                </View>
+                            </Surface>
+                        ))}
                     </ScrollView>
                 </View>
 
-                {/* Recent Reports */}
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Text variant="titleLarge" style={styles.sectionTitle}>Recent Reports</Text>
-                        <Button mode="text" onPress={() => navigation.navigate('Upload')}>See All</Button>
+                {/* Health Overview Glass Card */}
+                <Surface style={[styles.healthCard, { backgroundColor: theme.colors.primary }]} elevation={5}>
+                    <View style={styles.healthHeader}>
+                        <Text variant="titleMedium" style={{ color: 'white', opacity: 0.9 }}>Health Score</Text>
+                        <Chip textStyle={{ color: 'white', fontSize: 12 }} style={styles.healthChip}>EXCELLENT</Chip>
                     </View>
-                    {recentReports.map((report) => (
-                        <Card key={report.id} style={styles.reportItem} onPress={() => navigation.navigate('ReportDetails', { reportId: report.id })}>
-                            <Card.Title
-                                title={report.title}
-                                subtitle={report.date}
-                                left={(props) => <Icon name="file-document-outline" size={24} color={theme.colors.primary} style={{ marginRight: 10 }} />}
-                                right={(props) => <Text style={{ color: report.status === 'Normal' ? 'green' : 'orange', marginRight: 15 }}>{report.status}</Text>}
-                            />
+                    <View style={styles.healthScoreRow}>
+                        <Text style={styles.healthScoreText}>85</Text>
+                        <Text style={styles.healthScoreSub}>/100</Text>
+                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                            <Icon name="trending-up" size={40} color="rgba(255,255,255,0.4)" />
+                        </View>
+                    </View>
+                    <ProgressBar progress={0.85} color="white" style={styles.healthProgress} />
+                </Surface>
+
+                {/* Vitals Grid */}
+                <View style={styles.vitalsGrid}>
+                    {stats.map(stat => (
+                        <Card key={stat.label} style={styles.vitalCard}>
+                            <Card.Content>
+                                <Icon name={stat.icon as any} size={24} color={stat.color} />
+                                <Text style={styles.vitalValue}>{stat.value}</Text>
+                                <Text style={styles.vitalLabel}>{stat.label} ({stat.unit})</Text>
+                            </Card.Content>
                         </Card>
                     ))}
                 </View>
 
+                {/* Quick Shortcuts */}
+                <View style={styles.section}>
+                    <Text variant="titleMedium" style={styles.sectionTitle}>Main Services</Text>
+                    <View style={styles.shortcutGrid}>
+                        <TouchableOpacity style={styles.shortcut} onPress={() => navigation.navigate('Upload')}>
+                            <Surface style={[styles.shortcutIcon, { backgroundColor: '#E0F2F1' }]} elevation={1}>
+                                <Icon name="cloud-upload" size={24} color="#00695C" />
+                            </Surface>
+                            <Text variant="labelSmall" style={styles.shortcutText}>Upload</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.shortcut} onPress={() => navigation.navigate('Ask')}>
+                            <Surface style={[styles.shortcutIcon, { backgroundColor: '#E3F2FD' }]} elevation={1}>
+                                <Icon name="robot" size={24} color="#0277BD" />
+                            </Surface>
+                            <Text variant="labelSmall" style={styles.shortcutText}>AI Ask</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.shortcut} onPress={() => navigation.navigate('Hospitals')}>
+                            <Surface style={[styles.shortcutIcon, { backgroundColor: '#FCE4EC' }]} elevation={1}>
+                                <Icon name="hospital-marker" size={24} color="#C2185B" />
+                            </Surface>
+                            <Text variant="labelSmall" style={styles.shortcutText}>Clinics</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.shortcut} onPress={() => alert('Emergency SOS')}>
+                            <Surface style={[styles.shortcutIcon, { backgroundColor: '#FFEBEE' }]} elevation={1}>
+                                <Icon name="ambulance" size={24} color="#D32F2F" />
+                            </Surface>
+                            <Text variant="labelSmall" style={styles.shortcutText}>SOS</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* Recent Activities Section (Cleaner) */}
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <Text variant="titleMedium" style={styles.sectionTitle}>Medical Timeline</Text>
+                        <Button mode="text" labelStyle={{ fontSize: 12 }} onPress={() => navigation.navigate('History')}>View All</Button>
+                    </View>
+                    <Card style={styles.timelineCard}>
+                        <List.Item
+                            title="Blood Analysis Result"
+                            description="Updated 2 hours ago"
+                            left={props => <Avatar.Icon {...props} icon="flask-outline" size={40} style={{ backgroundColor: '#E0F2F1' }} color="#00695C" />}
+                            right={props => <Icon name="chevron-right" size={20} style={{ alignSelf: 'center' }} color={theme.colors.outline} />}
+                            onPress={() => navigation.navigate('History')}
+                        />
+                    </Card>
+                </View>
+
+                <View style={{ height: 100 }} />
             </ScrollView>
         </ScreenWrapper>
     );
 };
 
+import { Chip, List } from 'react-native-paper';
+
 const styles = StyleSheet.create({
     screen: {
-        paddingTop: 10
+        backgroundColor: '#F5F5F5',
     },
     container: {
         padding: 20,
-        paddingTop: 10,
-        paddingBottom: 40,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 25,
+        marginTop: 10,
     },
-    summaryCard: {
-        marginBottom: 20,
+    headerIcons: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 15,
+    },
+    iconBtn: {
+        width: 45,
+        height: 45,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'white',
         borderRadius: 15,
     },
-    scoreRow: {
+    badge: {
+        position: 'absolute',
+        top: 10,
+        right: 12,
+        backgroundColor: '#FF7043',
+    },
+    alertSection: {
+        marginBottom: 25,
+    },
+    sectionTitle: {
+        fontWeight: 'bold',
+        marginBottom: 12,
+    },
+    alertScroll: {
         flexDirection: 'row',
-        alignItems: 'flex-end',
     },
-    progressBar: {
-        height: 8,
-        borderRadius: 4,
-        marginTop: 5,
-        backgroundColor: 'rgba(0,0,0,0.1)'
+    alertCard: {
+        width: 200,
+        marginRight: 15,
+        padding: 12,
+        borderRadius: 18,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
     },
-    shortcutRow: {
+    alertIcon: {
+        width: 36,
+        height: 36,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    healthCard: {
+        padding: 20,
+        borderRadius: 24,
+        marginBottom: 20,
+    },
+    healthHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 25,
-        gap: 15
-    },
-    shortcutBtn: {
-        flex: 1,
-        padding: 15,
-        borderRadius: 12,
         alignItems: 'center',
-        justifyContent: 'center',
+    },
+    healthChip: {
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        height: 24,
+    },
+    healthScoreRow: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        marginTop: 10,
+    },
+    healthScoreText: {
+        fontSize: 50,
+        fontWeight: 'bold',
+        color: 'white',
+    },
+    healthScoreSub: {
+        fontSize: 18,
+        color: 'white',
+        opacity: 0.7,
+        marginLeft: 4,
+    },
+    healthProgress: {
+        height: 8,
+        borderRadius: 4,
+        marginTop: 15,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+    },
+    vitalsGrid: {
+        flexDirection: 'row',
+        gap: 15,
+        marginBottom: 25,
+    },
+    vitalCard: {
+        flex: 1,
+        borderRadius: 20,
+        backgroundColor: 'white',
+    },
+    vitalValue: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginTop: 5,
+    },
+    vitalLabel: {
+        fontSize: 12,
+        color: '#666',
+        marginTop: 2,
     },
     section: {
         marginBottom: 25,
@@ -186,38 +277,29 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 10
     },
-    sectionTitle: {
-        fontWeight: 'bold',
+    shortcutGrid: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
     },
-    aiCard: {
-        backgroundColor: '#fff9c4', // Light Yellow
+    shortcut: {
+        alignItems: 'center',
+        gap: 8,
     },
-    medCard: {
-        width: 140,
-        marginRight: 12,
-        borderRadius: 12,
-    },
-    medIcon: {
-        backgroundColor: '#e0f7fa',
-        width: 35,
-        height: 35,
-        borderRadius: 10,
+    shortcutIcon: {
+        width: 55,
+        height: 55,
+        borderRadius: 18,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 5
     },
-    timeBadge: {
-        marginTop: 8,
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 4,
-        alignSelf: 'flex-start'
+    shortcutText: {
+        fontWeight: '600',
     },
-    reportItem: {
-        marginBottom: 10,
-        backgroundColor: 'white'
+    timelineCard: {
+        borderRadius: 20,
+        backgroundColor: 'white',
+        overflow: 'hidden',
     }
 });
 

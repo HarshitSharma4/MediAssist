@@ -2,11 +2,12 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type RootStackParamList = {
     Auth: undefined;
-    Main: NavigatorScreenParams<MainTabParamList>;
+    Main: undefined;
+    ReportMetadata: { fileUri: string; type: 'pdf' | 'image' };
+    HospitalDetails: { id: string };
     ReportDetails: { reportId: string };
-    HospitalDetails: { hospitalId: string };
-    ReportMetadata: { fileUri?: string; type?: 'image' | 'pdf' };
-    AIAnalysis: { reportId: string };
+    History: undefined;
+    EditProfile: undefined;
 };
 
 export type MainTabParamList = {
