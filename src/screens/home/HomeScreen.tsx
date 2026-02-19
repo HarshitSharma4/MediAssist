@@ -35,7 +35,7 @@ const HomeScreen = ({ navigation }: any) => {
                         </Text>
                     </View>
                     <View style={styles.headerIcons}>
-                        <TouchableOpacity style={styles.iconBtn}>
+                        <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.navigate('Notifications')}>
                             <Icon name="bell-outline" size={26} color={theme.colors.onSurface} />
                             <Badge size={8} style={styles.badge} />
                         </TouchableOpacity>

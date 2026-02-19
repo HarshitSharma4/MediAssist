@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Text, Avatar, List, Switch, Divider, useTheme, Button, Surface } from 'react-native-paper';
+import { Text, Avatar, List, Switch, Divider, useTheme, Surface } from 'react-native-paper';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import { useAuthStore } from '../../store/useAuthStore';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
@@ -9,6 +9,10 @@ const ProfileScreen = ({ navigation }: any) => {
     const theme = useTheme();
     const { user, logout } = useAuthStore();
 
+    const avatarSource = user?.profileImage
+        ? { uri: user.profileImage }
+        : { uri: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name || 'Harshit'}` };
+
     return (
         <ScreenWrapper style={styles.screen}>
             <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
@@ -16,27 +20,30 @@ const ProfileScreen = ({ navigation }: any) => {
                 {/* Profile Card */}
                 <Surface style={styles.profileHeader} elevation={2}>
                     <View style={styles.avatarWrapper}>
-                        <Avatar.Image size={100} source={{ uri: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Harshit' }} style={{ backgroundColor: '#E0F2F1' }} />
+                        <Avatar.Image size={100} source={avatarSource} style={{ backgroundColor: '#E0F2F1' }} />
                         <TouchableOpacity style={styles.editIcon} onPress={() => navigation.navigate('EditProfile')}>
                             <Icon name="pencil" size={16} color="white" />
                         </TouchableOpacity>
                     </View>
                     <Text variant="headlineSmall" style={styles.name}>{user?.name || 'Harshit'}</Text>
                     <Text variant="bodyMedium" style={styles.email}>{user?.email || 'harshit@example.com'}</Text>
+                    {user?.dob && (
+                        <Text variant="labelMedium" style={styles.dob}>Born: {user.dob}</Text>
+                    )}
 
                     <View style={styles.statBar}>
                         <View style={styles.statItem}>
-                            <Text variant="titleMedium" style={styles.statValue}>O+</Text>
+                            <Text variant="titleMedium" style={styles.statValue}>{user?.bloodGroup || 'O+'}</Text>
                             <Text variant="labelSmall" style={styles.statLabel}>Blood</Text>
                         </View>
                         <Divider style={styles.verticalDivider} />
                         <View style={styles.statItem}>
-                            <Text variant="titleMedium" style={styles.statValue}>175</Text>
+                            <Text variant="titleMedium" style={styles.statValue}>{user?.height || '175'} cm</Text>
                             <Text variant="labelSmall" style={styles.statLabel}>Height</Text>
                         </View>
                         <Divider style={styles.verticalDivider} />
                         <View style={styles.statItem}>
-                            <Text variant="titleMedium" style={styles.statValue}>70</Text>
+                            <Text variant="titleMedium" style={styles.statValue}>{user?.weight || '70'} kg</Text>
                             <Text variant="labelSmall" style={styles.statLabel}>Weight</Text>
                         </View>
                     </View>
@@ -132,6 +139,10 @@ const styles = StyleSheet.create({
     email: {
         color: '#666',
         marginTop: 4,
+    },
+    dob: {
+        color: '#999',
+        marginTop: 5,
     },
     statBar: {
         flexDirection: 'row',

@@ -1,25 +1,50 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
-import { Text, TextInput, Button, useTheme, Avatar, Surface, HelperText } from 'react-native-paper';
+import { Text, TextInput, Button, useTheme, Avatar, Surface } from 'react-native-paper';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import { useAuthStore } from '../../store/useAuthStore';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import * as ImagePicker from 'expo-image-picker';
 
 const EditProfileScreen = () => {
     const theme = useTheme();
     const navigation = useNavigation();
-    const { user, updateProfile } = useAuthStore() as any; // Assuming updateProfile exists or we add it
+    const { user, updateProfile } = useAuthStore() as any;
 
     const [name, setName] = useState(user?.name || '');
     const [email, setEmail] = useState(user?.email || '');
-    const [bloodGroup, setBloodGroup] = useState('O+');
-    const [weight, setWeight] = useState('70');
-    const [height, setHeight] = useState('175');
+    const [dob, setDob] = useState(user?.dob || '');
+    const [bloodGroup, setBloodGroup] = useState(user?.bloodGroup || 'O+');
+    const [weight, setWeight] = useState(user?.weight || '70');
+    const [height, setHeight] = useState(user?.height || '175');
+    const [image, setImage] = useState(user?.profileImage || '');
+
+    const pickImage = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setImage(result.assets[0].uri);
+        }
+    };
 
     const handleSave = () => {
-        // Mock update
+        updateProfile({
+            name,
+            email,
+            dob,
+            bloodGroup,
+            weight,
+            height,
+            profileImage: image
+        });
+
         Toast.show({
             type: 'success',
             text1: 'Profile Updated',
@@ -28,23 +53,29 @@ const EditProfileScreen = () => {
         navigation.goBack();
     };
 
+    const avatarSource = image
+        ? { uri: image }
+        : { uri: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}` };
+
     return (
         <ScreenWrapper style={styles.screen}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}
-                keyboardVerticalOffset={100}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 80}
             >
                 <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 
                     <View style={styles.avatarSection}>
                         <View style={styles.avatarWrapper}>
-                            <Avatar.Image size={120} source={{ uri: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}` }} style={{ backgroundColor: '#E0F2F1' }} />
-                            <TouchableOpacity style={styles.cameraIcon}>
+                            <Avatar.Image size={120} source={avatarSource} style={{ backgroundColor: '#E0F2F1' }} />
+                            <TouchableOpacity style={styles.cameraIcon} onPress={pickImage}>
                                 <Icon name="camera" size={20} color="white" />
                             </TouchableOpacity>
                         </View>
-                        <Text variant="labelLarge" style={{ marginTop: 10, color: theme.colors.primary }}>Change Photo</Text>
+                        <TouchableOpacity onPress={pickImage}>
+                            <Text variant="labelLarge" style={{ marginTop: 10, color: theme.colors.primary }}>Change Photo</Text>
+                        </TouchableOpacity>
                     </View>
 
                     <Surface style={styles.formCard} elevation={1}>
@@ -72,6 +103,20 @@ const EditProfileScreen = () => {
                                 activeUnderlineColor={theme.colors.primary}
                                 keyboardType="email-address"
                                 left={<TextInput.Icon icon="email-outline" />}
+                            />
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <Text variant="labelMedium" style={styles.label}>Date of Birth</Text>
+                            <TextInput
+                                mode="flat"
+                                value={dob}
+                                onChangeText={setDob}
+                                style={styles.input}
+                                underlineColor="transparent"
+                                activeUnderlineColor={theme.colors.primary}
+                                placeholder="DD/MM/YYYY"
+                                left={<TextInput.Icon icon="calendar-range" />}
                             />
                         </View>
 

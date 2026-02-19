@@ -8,6 +8,7 @@ export type RootStackParamList = {
     ReportDetails: { reportId: string };
     History: undefined;
     EditProfile: undefined;
+    Notifications: undefined;
 };
 
 export type MainTabParamList = {

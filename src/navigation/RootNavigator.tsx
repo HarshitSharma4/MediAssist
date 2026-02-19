@@ -20,6 +20,7 @@ import HospitalDetailsScreen from '../screens/hospitals/HospitalDetailsScreen';
 import ReportDetailsScreen from '../screens/reports/details/ReportDetailsScreen';
 import HistoryScreen from '../screens/reports/history/HistoryScreen';
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
+import NotificationScreen from '../screens/notifications/NotificationScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -115,6 +116,7 @@ const RootNavigator = () => {
                 <Stack.Screen name="ReportDetails" component={ReportDetailsScreen} options={{ headerShown: true, title: 'Medical Report', headerTransparent: true }} />
                 <Stack.Screen name="History" component={HistoryScreen} options={{ headerShown: true, title: 'Medical Records', headerTransparent: true }} />
                 <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ headerShown: true, title: 'Edit Profile', headerTransparent: true }} />
+                <Stack.Screen name="Notifications" component={NotificationScreen} options={{ headerShown: false }} />
             </Stack.Navigator>
         </NavigationContainer>
     );

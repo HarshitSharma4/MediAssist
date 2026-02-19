@@ -4,6 +4,11 @@ interface User {
     id: string;
     name: string;
     email: string;
+    dob?: string;
+    bloodGroup?: string;
+    weight?: string;
+    height?: string;
+    profileImage?: string;
 }
 
 interface AuthState {
