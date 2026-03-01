@@ -9,55 +9,29 @@ const RegisterScreen = ({ navigation }: any) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [errors, setErrors] = useState({ name: '', email: '', password: '' });
 
-    const [errors, setErrors] = useState({
-        name: '',
-        email: '',
-        password: ''
-    });
-
-    const login = useAuthStore((state) => state.login);
+    const { register, isLoading } = useAuthStore();
 
     const validate = () => {
         let isValid = true;
-        let newErrors = { name: '', email: '', password: '' };
-
-        if (!name) {
-            newErrors.name = 'Name is required';
-            isValid = false;
-        }
-
-        if (!email) {
-            newErrors.email = 'Email is required';
-            isValid = false;
-        } else if (!/\S+@\S+\.\S+/.test(email)) {
-            newErrors.email = 'Email is invalid';
-            isValid = false;
-        }
-
-        if (!password) {
-            newErrors.password = 'Password is required';
-            isValid = false;
-        } else if (password.length < 6) {
-            newErrors.password = 'Password must be at least 6 characters';
-            isValid = false;
-        }
-
+        const newErrors = { name: '', email: '', password: '' };
+        if (!name) { newErrors.name = 'Name is required'; isValid = false; }
+        if (!email) { newErrors.email = 'Email is required'; isValid = false; }
+        else if (!/\S+@\S+\.\S+/.test(email)) { newErrors.email = 'Email is invalid'; isValid = false; }
+        if (!password) { newErrors.password = 'Password is required'; isValid = false; }
+        else if (password.length < 6) { newErrors.password = 'Password must be at least 6 characters'; isValid = false; }
         setErrors(newErrors);
         return isValid;
-    }
+    };
 
-    const handleRegister = () => {
-        if (validate()) {
-            // Simulate API call
-            setTimeout(() => {
-                login({ id: '1', name, email });
-                Toast.show({
-                    type: 'success',
-                    text1: 'Registration Successful',
-                    text2: `Welcome, ${name}!`
-                });
-            }, 500);
+    const handleRegister = async () => {
+        if (!validate()) return;
+        try {
+            await register(name, email, password);
+            Toast.show({ type: 'success', text1: 'Registration Successful', text2: `Welcome, ${name}!` });
+        } catch (e: any) {
+            Toast.show({ type: 'error', text1: 'Registration Failed', text2: e.message || 'Please try again.' });
         }
     };
 
@@ -68,43 +42,43 @@ const RegisterScreen = ({ navigation }: any) => {
             <TextInput
                 label="Full Name"
                 value={name}
-                onChangeText={(text) => { setName(text); setErrors({ ...errors, name: '' }) }}
+                onChangeText={(t) => { setName(t); setErrors({ ...errors, name: '' }); }}
                 mode="outlined"
                 style={styles.input}
                 error={!!errors.name}
             />
-            <HelperText type="error" visible={!!errors.name}>
-                {errors.name}
-            </HelperText>
+            <HelperText type="error" visible={!!errors.name}>{errors.name}</HelperText>
 
             <TextInput
                 label="Email"
                 value={email}
-                onChangeText={(text) => { setEmail(text); setErrors({ ...errors, email: '' }) }}
+                onChangeText={(t) => { setEmail(t); setErrors({ ...errors, email: '' }); }}
                 mode="outlined"
                 style={styles.input}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 error={!!errors.email}
             />
-            <HelperText type="error" visible={!!errors.email}>
-                {errors.email}
-            </HelperText>
+            <HelperText type="error" visible={!!errors.email}>{errors.email}</HelperText>
 
             <TextInput
                 label="Password"
                 value={password}
-                onChangeText={(text) => { setPassword(text); setErrors({ ...errors, password: '' }) }}
+                onChangeText={(t) => { setPassword(t); setErrors({ ...errors, password: '' }); }}
                 mode="outlined"
                 style={styles.input}
                 secureTextEntry
                 error={!!errors.password}
             />
-            <HelperText type="error" visible={!!errors.password}>
-                {errors.password}
-            </HelperText>
+            <HelperText type="error" visible={!!errors.password}>{errors.password}</HelperText>
 
-            <Button mode="contained" onPress={handleRegister} style={styles.button}>
+            <Button
+                mode="contained"
+                onPress={handleRegister}
+                style={styles.button}
+                loading={isLoading}
+                disabled={isLoading}
+            >
                 Register
             </Button>
 
@@ -116,24 +90,11 @@ const RegisterScreen = ({ navigation }: any) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 20,
-        justifyContent: 'center',
-    },
-    title: {
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    input: {
-        marginTop: 5,
-    },
-    button: {
-        marginTop: 10,
-        padding: 6,
-    },
-    link: {
-        marginTop: 10,
-    }
+    container: { padding: 20, justifyContent: 'center' },
+    title: { marginBottom: 20, textAlign: 'center' },
+    input: { marginTop: 5 },
+    button: { marginTop: 10, padding: 6 },
+    link: { marginTop: 10 },
 });
 
 export default RegisterScreen;

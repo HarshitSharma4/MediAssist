@@ -8,43 +8,26 @@ import Toast from 'react-native-toast-message';
 const LoginScreen = ({ navigation }: any) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [errors, setErrors] = useState({ email: '', password: '' });
 
-    const [errors, setErrors] = useState({
-        email: '',
-        password: ''
-    });
-
-    const login = useAuthStore((state) => state.login);
+    const { login, isLoading } = useAuthStore();
 
     const validate = () => {
         let isValid = true;
-        let newErrors = { email: '', password: '' };
-
-        if (!email) {
-            newErrors.email = 'Email is required';
-            isValid = false;
-        }
-
-        if (!password) {
-            newErrors.password = 'Password is required';
-            isValid = false;
-        }
-
+        const newErrors = { email: '', password: '' };
+        if (!email) { newErrors.email = 'Email is required'; isValid = false; }
+        if (!password) { newErrors.password = 'Password is required'; isValid = false; }
         setErrors(newErrors);
         return isValid;
-    }
+    };
 
-    const handleLogin = () => {
-        if (validate()) {
-            // Mock login
-            setTimeout(() => {
-                login({ id: '1', name: 'User', email });
-                Toast.show({
-                    type: 'success',
-                    text1: 'Login Successful',
-                    text2: 'Welcome back to MediAssist!'
-                });
-            }, 500);
+    const handleLogin = async () => {
+        if (!validate()) return;
+        try {
+            await login(email, password);
+            Toast.show({ type: 'success', text1: 'Login Successful', text2: 'Welcome back to MediAssist!' });
+        } catch (e: any) {
+            Toast.show({ type: 'error', text1: 'Login Failed', text2: e.message || 'Please check your credentials.' });
         }
     };
 
@@ -55,31 +38,33 @@ const LoginScreen = ({ navigation }: any) => {
             <TextInput
                 label="Email"
                 value={email}
-                onChangeText={(text) => { setEmail(text); setErrors({ ...errors, email: '' }) }}
+                onChangeText={(t) => { setEmail(t); setErrors({ ...errors, email: '' }); }}
                 mode="outlined"
                 style={styles.input}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 error={!!errors.email}
             />
-            <HelperText type="error" visible={!!errors.email}>
-                {errors.email}
-            </HelperText>
+            <HelperText type="error" visible={!!errors.email}>{errors.email}</HelperText>
 
             <TextInput
                 label="Password"
                 value={password}
-                onChangeText={(text) => { setPassword(text); setErrors({ ...errors, password: '' }) }}
+                onChangeText={(t) => { setPassword(t); setErrors({ ...errors, password: '' }); }}
                 mode="outlined"
                 style={styles.input}
                 secureTextEntry
                 error={!!errors.password}
             />
-            <HelperText type="error" visible={!!errors.password}>
-                {errors.password}
-            </HelperText>
+            <HelperText type="error" visible={!!errors.password}>{errors.password}</HelperText>
 
-            <Button mode="contained" onPress={handleLogin} style={styles.button}>
+            <Button
+                mode="contained"
+                onPress={handleLogin}
+                style={styles.button}
+                loading={isLoading}
+                disabled={isLoading}
+            >
                 Login
             </Button>
 
@@ -91,24 +76,11 @@ const LoginScreen = ({ navigation }: any) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 20,
-        justifyContent: 'center',
-    },
-    title: {
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    input: {
-        marginTop: 5,
-    },
-    button: {
-        marginTop: 10,
-        padding: 6,
-    },
-    link: {
-        marginTop: 10,
-    }
+    container: { padding: 20, justifyContent: 'center' },
+    title: { marginBottom: 20, textAlign: 'center' },
+    input: { marginTop: 5 },
+    button: { marginTop: 10, padding: 6 },
+    link: { marginTop: 10 },
 });
 
 export default LoginScreen;

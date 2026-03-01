@@ -5,6 +5,7 @@ import ScreenWrapper from '../../components/common/ScreenWrapper';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { Audio, AVPlaybackStatus, AVPlaybackStatusSuccess } from 'expo-av';
+import { chatApi } from '../../services/api';
 
 interface Message {
     id: string;
@@ -86,6 +87,7 @@ const ChatScreen = () => {
     const { context } = (route.params as any) || {};
 
     const [text, setText] = useState('');
+    const [sessionId, setSessionId] = useState<string | undefined>(undefined);
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
@@ -99,6 +101,7 @@ const ChatScreen = () => {
     const [recordTime, setRecordTime] = useState(0);
     const [isSending, setIsSending] = useState(false);
     const [keyboardVisible, setKeyboardVisible] = useState(false);
+    const [isAiTyping, setIsAiTyping] = useState(false);
 
     const recordingRef = useRef<Audio.Recording | null>(null);
 
@@ -129,23 +132,15 @@ const ChatScreen = () => {
     useEffect(() => {
         if (context) {
             setMode('report');
-            const contextMsg: Message = {
+            const userMsg: Message = {
                 id: Date.now().toString(),
                 text: `Analyzing context: "${context}"`,
                 sender: 'user',
                 timestamp: new Date()
             };
-            setMessages(prev => [...prev, contextMsg]);
-
-            setTimeout(() => {
-                const aiReponse: Message = {
-                    id: (Date.now() + 1).toString(),
-                    text: "I've reviewed the report details. There are a few observations regarding the white blood cell count. Would you like a detailed breakdown?",
-                    sender: 'ai',
-                    timestamp: new Date()
-                };
-                setMessages(prev => [...prev, aiReponse]);
-            }, 1000);
+            setMessages(prev => [...prev, userMsg]);
+            // Ask the real AI about this context
+            callAI(`Analyze this medical report context: ${context}`);
         }
     }, [context]);
 
@@ -181,36 +176,43 @@ const ChatScreen = () => {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    const sendMessage = () => {
-        if (!text.trim()) return;
-
-        const newMessage: Message = {
-            id: Date.now().toString(),
-            text: text,
-            sender: 'user',
-            timestamp: new Date(),
-        };
-
-        setMessages((prev) => [...prev, newMessage]);
-        setText('');
-
-        simulateAIResponse();
-    };
-
-    const simulateAIResponse = (isVoiceQuery = false) => {
-        setTimeout(() => {
+    const callAI = async (prompt: string) => {
+        setIsAiTyping(true);
+        try {
+            const result = await chatApi.ask(prompt, sessionId);
+            if (!sessionId) setSessionId(result.session_id);
             const aiResponse: Message = {
                 id: (Date.now() + 1).toString(),
-                text: isVoiceQuery
-                    ? "I've processed your voice request. Based on what you said, I recommend checking your iron levels in your next report."
-                    : mode === 'general'
-                        ? "Based on medical guidelines, it's best to monitor these symptoms for 24 hours. Does the pain radiate?"
-                        : "Looking at the lab values, your glucose levels are within a healthy fasting range.",
+                text: result.reply,
                 sender: 'ai',
                 timestamp: new Date(),
             };
             setMessages((prev) => [...prev, aiResponse]);
-        }, 1500);
+        } catch (e: any) {
+            const errMsg: Message = {
+                id: (Date.now() + 1).toString(),
+                text: `Sorry, I couldn't connect to the AI service. Please check your internet and try again.`,
+                sender: 'ai',
+                timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, errMsg]);
+        } finally {
+            setIsAiTyping(false);
+        }
+    };
+
+    const sendMessage = async () => {
+        if (!text.trim()) return;
+        const userText = text;
+        const newMessage: Message = {
+            id: Date.now().toString(),
+            text: userText,
+            sender: 'user',
+            timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, newMessage]);
+        setText('');
+        await callAI(userText);
     };
 
     const startRecording = async () => {
