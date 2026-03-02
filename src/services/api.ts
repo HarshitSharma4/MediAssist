@@ -1,7 +1,7 @@
 // Base URL — update this to your machine's IP when testing on a physical device
 // For Android emulator use: http://10.0.2.2:8000
 // For iOS simulator / Expo Go on real device: http://<your-local-ip>:8000
-export const BASE_URL = 'http://localhost:8000';
+export const BASE_URL = 'http://10.186.96.1:8000';
 const API_URL = `${BASE_URL}/api/v1`;
 
 // ─── Token storage (in-memory; persisted via Zustand + AsyncStorage) ─────────
